@@ -1,7 +1,6 @@
-const Discord = require('discord.js');
-const dotenv = require('dotenv');
-const fetch = require('node-fetch');
-
+import Discord = require('discord.js');
+import dotenv = require('dotenv');
+import fetch from 'node-fetch';
 // create a new Discord client
 const client = new Discord.Client();
 // able to get info from .env file
@@ -24,16 +23,20 @@ client.on('message', message => {
         return;
     // parse arguments and the base command
     const args = message.content.slice(prefix.length).trim().split(/ +/);
-	const command = args.shift().toLowerCase();
-    console.log(command);
-    // fetch from overwatch api
-    getOverwatchStats("pc", "us", "Sarako-11771", false, false).then(data => {
-
-    })
+    const command = args.shift()?.toLowerCase();
+    
+    if (command === "ping") {
+        message.channel.send('Pong.');
+    } else {
+        getOverwatchStats("pc", "us", "Sarako-11771").then(data => {
+            console.log(data);
+            message.channel.send(`Wow your account ${data.name} is level ${data.prestige}${data.level}`);
+        });
+    }
 });
 
 // function to fetch overwatch stats from the Overwatch API
-async function getOverwatchStats(platform, region, battletag, complete, heroes) {
+async function getOverwatchStats(platform: string, region: string, battletag: string, complete = false, heroes ? : string[]) {
     // determine API endpoint based off arguments inputted by the user
     let apiEndPoint; 
     if (heroes) {

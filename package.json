@@ -4,16 +4,21 @@
   "description": "Discord Bot",
   "main": "index.js",
   "dependencies": {
+    "@types/node": "^14.0.27",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "node-fetch": "^2.6.0",
-    "ts-node-dev": "^1.0.0-pre.56",
     "typescript": "^3.9.7"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.7",
+    "ts-node-dev": "^1.0.0-pre.56"
+  },
   "scripts": {
     "start": "node index.js",
-    "tsc": "tsc"
+    "tsc": "tsc",
+    "dev": "ts-node-dev --respawn --clear --transpile-only index.ts",
+    "prod": "tsc index.ts && node index.js"
   },
   "author": "",
   "license": "ISC"
