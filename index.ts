@@ -29,16 +29,16 @@ const prefix = "!"
 
 const helpEmbed = new Discord.MessageEmbed()
 	.setColor('#0099ff')
-	.setTitle('Help')
+	.setTitle(`Help! Prefix is "${prefix}"`)
 	.setDescription('Learn about the commands!')
 	.addFields(
-        { name: '!ping', value: 'Pings' },
-        { name: '!beep', value: 'Boops' },
-        { name: '!boop', value: 'Beeps' },
-        { name: '!uptime', value: 'Gets the uptime of the bot!' },
-        { name: '!server', value: 'Gets information about the server!' },
-        { name: '!user', value: 'Gets information about the user!' },
-		{ name: '!overwatch or !ow', value: 'Responds with Overwatch stats. \n \nUsage: ``!ow <platform: pc, xbox, ps4, switch> <region: us, eu, asia> <battle tag>``'},
+        { name: 'ping', value: 'Pings' },
+        { name: 'beep', value: 'Boops' },
+        { name: 'boop', value: 'Beeps' },
+        { name: 'uptime', value: 'Gets the uptime of the bot!' },
+        { name: 'server', value: 'Gets information about the server!' },
+        { name: 'avatar', value: "Sends the user's or mentioned user's avatar!" },
+		{ name: 'overwatch | ow', value: 'Responds with Overwatch stats. \n \nUsage: ``ow <platform: pc, xbox, ps4, switch> <region: us, eu, asia> <battle tag>``'},
 	)
     .setTimestamp()
     
@@ -48,9 +48,10 @@ client.on('message', message => {
     const mention = message.mentions.members?.first();
     const username = client.user?.username;
 
-    if (mention?.user.username === client.user?.username && mention?.user.discriminator === client.user?.discriminator) {
+    // if the mention starts with a mention to the bot
+    if (message.content.startsWith('<@') && mention?.user.username === client.user?.username && mention?.user.discriminator === client.user?.discriminator) {
         message.channel.send(`Hey I'm ${username}! If you you're having trouble use the` + " ``!help`` command!");
-    }
+    } 
 
     // if message doesn't start with the prefix or it's a bot then ignore message 
     if (!message.content.startsWith(prefix) || message.author.bot) 
@@ -85,11 +86,30 @@ client.on('message', message => {
         let seconds = Math.floor(elapsedTime % 60);
 
         message.channel.send(`${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`);
+    } else if (command === "server") {
+        const serverEmbed = new Discord.MessageEmbed()
+            .setColor('#0099ff')
+            .setTitle(`Information about ${message.guild?.name}`)
+            .addFields(
+                { name: 'Region', value: `${message.guild?.region}` },
+                { name: 'Members', value: `${message.guild?.memberCount}` },
+                { name: 'Created', value: `${message.guild?.createdAt}` },
+            )
+            .setTimestamp()
+
+        if (message.guild?.icon) {
+            serverEmbed.setThumbnail(message.guild?.icon);
+        }
+        
+        message.channel.send(serverEmbed);
+    } else if (command === 'avatar') {
+        const user = mention?.user || message.author;
+        message.channel.send(`${user.username}'s avatar: ${user.displayAvatarURL({ dynamic: true })}`);
 
     } else if (command === "ow" || command === "overwatch") {
         // return if there isn't any arguments and give error message
-        if (args.length === 0) {
-            message.channel.send('There was 0 arguments given, 3 required. Please try again or use the ``!help`` command for more information!');
+        if (args.length < 3) {
+            message.channel.send(`There were ${args.length} arguments given, 3 required. Please try again or use the` + '``!help`` command for more information!');
             return;
         }
     
