@@ -47,10 +47,8 @@ function setStatus() {
             }, 
             status: 'online',
         })
-        .then(() => console.log('Status updated!'))
         .catch(console.error);
 }
-
 
 /* -----------------
     Command Handling
@@ -246,27 +244,22 @@ async function overwatchCommand(args: string[]) {
     // fetch overwatch stats and then send a message with those stats
     let fetchAndParse = getOverwatchStats(args[0], args[1], args[2]).then(data => {
         const OverwatchEmbed = new Discord.MessageEmbed()
-            .setColor('#0099ff')
-            .setTitle(`${data.name.split('#')[0]}'s Career Profile`)
+            .setColor('#f99e1a')
+            .setTitle(`${data.username}'s Career Profile`)
             .setAuthor('Overwatch Stats', 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Overwatch_circle_logo.svg/1024px-Overwatch_circle_logo.svg.png', `https://playoverwatch.com/en-us/career/${args[0]}/${args[2]}/`)
-            .setThumbnail(data.icon)
+            .setThumbnail(data.portrait)
             .addFields(
-                { name: 'Account Stats', value: `Level: ${data.prestige}${data.level} \nEndorsement: ${data.endorsement} \n` + (data.gamesWon !== 0 ? `Games won: ${data.gamesWon}` : "")},
+                { name: 'Account Stats', value: `Level: ${data.level} \nEndorsement Level: ${data.endorsement.frame ? data.endorsement.frame.split('_')[1] : 0} \nSportmanship: ${data.endorsement.sportsmanship.rate}% \nShotcaller: ${data.endorsement.shotcaller.rate}% \nGood Teammate: ${data.endorsement.teammate.rate}%
+                `},
             )
             .setTimestamp()
 
         if (!data.private) {
             // create embed message
-            OverwatchEmbed.addField('Quickplay', `Games Played: ${data.quickPlayStats.games.played} \nGames Won: ${data.quickPlayStats.games.won}`, false);
+            OverwatchEmbed.addField('Quickplay', `Playtime: ${data.playtime.quickplay}\nGames Played: ${data.games.quickplay.played} \nGames Won: ${data.games.quickplay.won}`, false);
             // if player has placed in the competitive season then displays stats
-            if (data.ratings && data.rating !== 0) {
-                // capitalize all the roles in data
-                for (let i = 0; i < data.ratings.length; i++) {
-                    let str = data.ratings[i].role;
-                    data.ratings[i].role = str.charAt(0).toUpperCase() + str.slice(1);
-                }
-
-                let competitveRatings = `Overall SR: ${data.rating} \n ${data.ratings[0].role}: ${data.ratings[0].level} \n${data.ratings[1].role}: ${data.ratings[1].level} \n${data.ratings[2].role}: ${data.ratings[2].level} \n Games Played: ${data.competitiveStats.games.played} \n Games Won: ${data.competitiveStats.games.won}`
+            if (data.games.competitive.played) {
+                let competitveRatings = `Tank: ${data.competitive.tank.rank ? data.competitive.tank.rank : "Not ranked"} \nDamage: ${data.competitive.damage.rank ? data.competitive.damage.rank : "Not ranked"} \nSupport: ${data.competitive.support.rank  ? data.competitive.support.rank : "Not ranked"} \nPlaytime: ${data.playtime.competitive} \nGames Played: ${data.games.competitive.played ? data.games.competitive.played : 0 } \nGames Won: ${data.games.competitive.won ? data.games.competitive.won : 0 } \nGames Drawn: ${data.games.competitive.draw ? data.games.competitive.draw : 0 } \nGames Lost: ${data.games.competitive.lost ? data.games.competitive.lost : 0 } \n${data.games.competitive.win_rate ? `Games Win Rate: ${data.games.competitive.win_rate}` : ""}`
 
                 OverwatchEmbed.addField('Competitive', competitveRatings, false);
             } else {
@@ -278,6 +271,7 @@ async function overwatchCommand(args: string[]) {
 
         return OverwatchEmbed;
     }).catch(err => {
+        console.error(err);
         return `The user could not be found, please try again.`;
     });
 
@@ -285,36 +279,10 @@ async function overwatchCommand(args: string[]) {
 }
 
 // function to fetch overwatch stats from the Overwatch API
-async function getOverwatchStats(platform: string, region: string, battletag: string, complete = false, heroes ? : string[]) {
-    // determine API endpoint based off arguments inputted by the user
-    let apiEndPoint; 
-    if (heroes) {
-        apiEndPoint = "heroes"
-    } else {
-        complete ? apiEndPoint = "complete" : apiEndPoint = "profile"
-    }
+async function getOverwatchStats(platform: string, region: string, battletag: string) {
     // fetch from Overwatch API 
-    const OverwatchAPI = `https://ow-api.com/v1/stats/${platform}/${region}/${battletag}/${apiEndPoint}`
+    const OverwatchAPI = `http://owapi.io/profile/${platform}/${region}/${battletag}/`
     let response = await fetch(OverwatchAPI);
-    let data = await response.json()
+    let data = await response.json();
     return data;
 }
-
-/* -----------------
-    On server join
-   ----------------
-*/
-
-client.on('guildCreate', guild => {
-    let defaultChannel: string;
-    
-    console.log(Discord.GuildChannel);
-    // guild.channels.forEach((channel) => {
-    //     if (channel.type == "text" && defaultChannel == "") {
-    //       if (channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
-    //         defaultChannel = channel;
-    //       }
-    //     }
-    //   })
-      //defaultChannel will be the channel object that it first finds the bot has permissions for
-});
