@@ -15,7 +15,7 @@ const botToken = process.env.DiscordBotToken;
 
 // login to discord and display the bot as online and active
 client.login(botToken);
-console.log('Logging in bot');
+console.log('Logging into bot');
 
 // used to calculate uptime of the bot, start time of bot
 let upTime: number; 
@@ -24,9 +24,21 @@ client.once('ready', () => {
     console.log('Bot initialized!');
     // get current time when bot comes online
     upTime = Date.now();
+    // set status to bot of number of servers
+    setStatus();
+    console.log('Status initialized!');
+    // update status every 5 min
+    const statusUpdate = setInterval(setStatus, 300000);
+});
 
-    // add status to bot of number of servers
-    let numOfServers = client.guilds.cache.size;
+
+/* -----------------
+    Command Handling
+   ----------------
+*/
+
+function setStatus() {
+    const numOfServers = client.guilds.cache.size;
 
     client.user?.setPresence({
          activity: {
@@ -35,9 +47,10 @@ client.once('ready', () => {
             }, 
             status: 'online',
         })
-        .then(() => console.log('Status initialized!'))
+        .then(() => console.log('Status updated!'))
         .catch(console.error);
-});
+}
+
 
 /* -----------------
     Command Handling
@@ -67,13 +80,41 @@ client.on('message', message => {
 
     // parse commands
     if (command === "ping") {
-        return message.channel.send(`Pong. 🏓 \n**Latency**: ${client.ws.ping}ms`);
+        if (mention) {
+            message.delete();
+
+            message.channel.send(`Pong. 🏓 <@${mention.id}> \n**Latency**: ${client.ws.ping}ms `)
+            .then(function (message) {
+                message.react("🏓")
+              });
+              return;
+        }
+
+        message.channel.send(`Pong. 🏓 \n**Latency**: ${client.ws.ping}ms`)
+        .then(function (message) {
+            message.react("🏓")
+          });
+          return;
+
     } else if (command === "help") {
         return message.channel.send(helpEmbed);
     } else if (command === "beep") {
-        return message.channel.send("Boop!");
+
+        message.channel.send("Boop!")
+        .then(function (message) {
+            message.react("🤖")
+          });
+
+          return
+
     } else if (command === "boop") {
-        return message.channel.send("Beep!");
+
+         message.channel.send("Speed boost! Booooppp! \nhttps://media1.tenor.com/images/046793278bc20fd91df0647227dc00d4/tenor.gif?itemid=8971897")
+        .then(function (message) {
+            message.react("🤖")
+          });
+
+          return
     } else if (command === "uptime") {
         return message.channel.send(calcUpTime());
     } else if (command === "server") {
@@ -146,8 +187,9 @@ function createServerEmbed(message: any): Discord.MessageEmbed {
         )
         .setTimestamp()
 
-    if (message.guild?.icon) {
-        serverEmbed.setThumbnail(message.guild?.icon);
+    const icon = message.guild.iconURL();
+    if (icon) {
+        serverEmbed.setThumbnail(icon);
     }
 
     return serverEmbed;
@@ -257,3 +299,22 @@ async function getOverwatchStats(platform: string, region: string, battletag: st
     let data = await response.json()
     return data;
 }
+
+/* -----------------
+    On server join
+   ----------------
+*/
+
+client.on('guildCreate', guild => {
+    let defaultChannel: string;
+    
+    console.log(Discord.GuildChannel);
+    // guild.channels.forEach((channel) => {
+    //     if (channel.type == "text" && defaultChannel == "") {
+    //       if (channel.permissionsFor(guild.me).has("SEND_MESSAGES")) {
+    //         defaultChannel = channel;
+    //       }
+    //     }
+    //   })
+      //defaultChannel will be the channel object that it first finds the bot has permissions for
+});
