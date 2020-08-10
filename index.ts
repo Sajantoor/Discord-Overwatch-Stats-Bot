@@ -28,7 +28,7 @@ client.once('ready', () => {
     setStatus();
     console.log('Status initialized!');
     // update status every 5 min
-    const statusUpdate = setInterval(setStatus, 300000);
+    setInterval(setStatus, 300000);
 });
 
 
@@ -84,6 +84,10 @@ client.on('message', message => {
             message.channel.send(`Pong. 🏓 <@${mention.id}> \n**Latency**: ${client.ws.ping}ms `)
             .then(function (message) {
                 message.react("🏓")
+                message.react("🅿")
+                message.react("ℹ")
+                message.react("🇳")
+                message.react("🇬")
               });
               return;
         }
@@ -122,7 +126,15 @@ client.on('message', message => {
         message.channel.send(`${user.username}'s avatar: ${user.displayAvatarURL({ dynamic: true })}`);    
     } else if (command === 'user') {
         message.channel.send(getUser(message));
-    } else if (command === "ow" || command === "overwatch") {
+    } else if (command === 'bruh' || command === 'meme') {
+        fetchMeme().then(meme => {
+            message.channel.send(meme.url);
+        });
+
+        return;
+     } else if (command === 'invite') {
+        message.channel.send(`**Invite **${client.user?.username} to your server!** \nhttps://discord.com/api/oauth2/authorize?client_id=738876776112980098&permissions=124992&scope=bot`);  
+     } else if (command === "ow" || command === "overwatch") {
         // return if there isn't any arguments and give error message
         if (args.length < 3) {
             message.channel.send(`There were ${args.length} arguments given, 3 required. Please try again or use the` + '``!help`` command for more information!');
@@ -154,6 +166,7 @@ const helpEmbed = new Discord.MessageEmbed()
         { name: 'server', value: 'Gets information about the server!' },
         { name: 'avatar', value: "Sends the user's or mentioned user's avatar!" },
         { name: 'user', value: "Sends the user's or mentioned user's information!" },
+        { name: 'bruh | meme', value: "Sends the user a meme from Reddit!" },
 		{ name: 'overwatch | ow', value: 'Responds with Overwatch stats. \n \nUsage: ``ow <platform: pc, xbox, ps4, switch> <region: us, eu, asia> <battle tag>``'},
 	)
     .setTimestamp()
@@ -259,7 +272,7 @@ async function overwatchCommand(args: string[]) {
             OverwatchEmbed.addField('Quickplay', `Playtime: ${data.playtime.quickplay}\nGames Played: ${data.games.quickplay.played} \nGames Won: ${data.games.quickplay.won}`, false);
             // if player has placed in the competitive season then displays stats
             if (data.games.competitive.played) {
-                let competitveRatings = `Tank: ${data.competitive.tank.rank ? data.competitive.tank.rank : "Not ranked"} \nDamage: ${data.competitive.damage.rank ? data.competitive.damage.rank : "Not ranked"} \nSupport: ${data.competitive.support.rank  ? data.competitive.support.rank : "Not ranked"} \nPlaytime: ${data.playtime.competitive} \nGames Played: ${data.games.competitive.played ? data.games.competitive.played : 0 } \nGames Won: ${data.games.competitive.won ? data.games.competitive.won : 0 } \nGames Drawn: ${data.games.competitive.draw ? data.games.competitive.draw : 0 } \nGames Lost: ${data.games.competitive.lost ? data.games.competitive.lost : 0 } \n${data.games.competitive.win_rate ? `Games Win Rate: ${data.games.competitive.win_rate}` : ""}`
+                let competitveRatings = `Tank: ${data.competitive.tank.rank ? data.competitive.tank.rank : "Not ranked"} \nDamage: ${data.competitive.damage.rank ? data.competitive.damage.rank : "Not ranked"} \nSupport: ${data.competitive.support.rank  ? data.competitive.support.rank : "Not ranked"} \n \nPlaytime: ${data.playtime.competitive} \nGames Played: ${data.games.competitive.played ? data.games.competitive.played : 0 } \nGames Won: ${data.games.competitive.won ? data.games.competitive.won : 0 } \nGames Drawn: ${data.games.competitive.draw ? data.games.competitive.draw : 0 } \nGames Lost: ${data.games.competitive.lost ? data.games.competitive.lost : 0 } \n${data.games.competitive.win_rate ? `Games Win Rate: ${data.games.competitive.win_rate}` : ""}`
 
                 OverwatchEmbed.addField('Competitive', competitveRatings, false);
             } else {
@@ -283,6 +296,14 @@ async function getOverwatchStats(platform: string, region: string, battletag: st
     // fetch from Overwatch API 
     const OverwatchAPI = `http://owapi.io/profile/${platform}/${region}/${battletag}/`
     let response = await fetch(OverwatchAPI);
+    let data = await response.json();
+    return data;
+}
+
+// fetch from meme api 
+async function fetchMeme() {
+    const memeURL = 'https://meme-api.herokuapp.com/gimme';
+    let response = await fetch(memeURL);
     let data = await response.json();
     return data;
 }

@@ -18,7 +18,7 @@
     "start": "node index.js",
     "tsc": "tsc",
     "dev": "ts-node-dev --respawn --clear --transpile-only index.ts",
-    "prod": "tsc index.ts && node index.js"
+    "prod": "tsc && node index.js"
   },
   "author": "",
   "license": "ISC"
