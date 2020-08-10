@@ -1,10 +1,12 @@
 # Shitty Robot Idea: The Discord Bot
+
 <p align="center">
   <img src="../assets/hello.png" alt="Screenshot of Hello Message"/>
 </p>
 
 > Learning how to develop a discord bot using Node.js and TypeScript!
 
+> Name and icons are inspired and from the YouTube channel [Michael Reeves](https://www.youtube.com/c/MichaelReeves)
 
 #### Table of Contents
  * [About](#About)
