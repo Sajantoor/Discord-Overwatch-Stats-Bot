@@ -33,7 +33,7 @@
 > [Discord.js](https://github.com/discordjs/discord.js) was an open source library that allowed for easy use of the [Discord API](https://discord.com/developers/docs/intro) within a JavaScript environment. 
 
 ### Google Cloud
-> [Google Cloud](https://cloud.google.com/nodejs) is the solution chosen to run the Node.js file in the cloud instead of locally. 
+> [Google Cloud](https://cloud.google.com/) is the solution used to host the Node.js script in the cloud instead of locally. This is done using [Google Cloud's Compute Engine](https://cloud.google.com/compute), the script is run in a Linux VM instance in the cloud.
 
 ### Overwatch API 
 > The [Overwatch API](https://github.com/alfg/overwatch-api) was used to fetch the user's or another users stats in the game Overwatch! This allowed users to look up this information within Discord without the need to have to go the Overwatch website. Example usage: `!ow pc us super#7181`
