@@ -15,10 +15,8 @@
     "ts-node-dev": "^1.0.0-pre.56"
   },
   "scripts": {
-    "start": "node index.js",
-    "tsc": "tsc",
     "dev": "ts-node-dev --respawn --clear --transpile-only index.ts",
-    "prod": "tsc index.ts && node index.js"
+    "start": "tsc index.ts && node index.js"
   },
   "author": "",
   "license": "ISC"
