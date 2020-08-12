@@ -47,7 +47,9 @@ function setStatus() {
             }, 
             status: 'online',
         })
-        .catch(console.error);
+        .catch(err => {
+            console.error(err);
+        });
 }
 
 /* -----------------
@@ -65,6 +67,7 @@ client.on('message', message => {
 
     // if the mention starts with a mention to the bot
     if (message.content.startsWith('<@') && mention?.user.username === client.user?.username && mention?.user.discriminator === client.user?.discriminator) {
+        log(message);
         return message.channel.send(`Hey I'm ${username}! If you you're having trouble use the` + " ``!help`` command!");
     } 
 
@@ -89,6 +92,7 @@ client.on('message', message => {
                 message.react("🇳")
                 message.react("🇬")
               });
+              log(message);
               return;
         }
 
@@ -96,18 +100,21 @@ client.on('message', message => {
         .then(function (message) {
             message.react("🏓")
           });
+
+          log(message);
           return;
 
     } else if (command === "help") {
+        log(message);
         return message.channel.send(helpEmbed);
     } else if (command === "beep") {
-
         message.channel.send("Boop!")
         .then(function (message) {
             message.react("🤖")
-          });
+            });
 
-          return
+        log(message);
+        return;
 
     } else if (command === "boop") {
 
@@ -116,32 +123,42 @@ client.on('message', message => {
             message.react("🤖")
           });
 
-          return
+          log(message);
+          return;
     } else if (command === "uptime") {
+        log(message);
         return message.channel.send(calcUpTime());
     } else if (command === "server") {
+        log(message);
         message.channel.send(createServerEmbed(message));
     } else if (command === 'avatar') {
         const user = mention?.user || message.author;
-        message.channel.send(`${user.username}'s avatar: ${user.displayAvatarURL({ dynamic: true })}`);    
+        log(message);
+        return message.channel.send(`${user.username}'s avatar: ${user.displayAvatarURL({ dynamic: true })}`);    
     } else if (command === 'user') {
-        message.channel.send(getUser(message));
+        log(message);
+        return message.channel.send(getUser(message));
     } else if (command === 'bruh' || command === 'meme') {
         fetchMeme().then(meme => {
             message.channel.send(meme.url);
+        }).catch(err => {
+            console.error(err)
         });
-
+        log(message);
         return;
      } else if (command === 'invite') {
-        message.channel.send(`**Invite **${client.user?.username} to your server!** \nhttps://discord.com/api/oauth2/authorize?client_id=738876776112980098&permissions=124992&scope=bot`);  
+        log(message);
+        return message.channel.send(`**Invite **${client.user?.username} to your server!** \nhttps://discord.com/api/oauth2/authorize?client_id=738876776112980098&permissions=124992&scope=bot`);  
      } else if (command === "ow" || command === "overwatch") {
         // return if there isn't any arguments and give error message
         if (args.length < 3) {
+            log(message);
             message.channel.send(`There were ${args.length} arguments given, 3 required. Please try again or use the` + '``!help`` command for more information!');
             return;
         }
 
         overwatchCommand(args).then(value => {
+            log(message);
             return message.channel.send(value);
         });
     } 
@@ -183,11 +200,11 @@ function calcUpTime(): string {
     let minutes = Math.floor(elapsedTime / 60);
     let seconds = Math.floor(elapsedTime % 60);
     // return string 
-    return `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`
+    return `${days} days, ${hours} hours, ${minutes} minutes and ${seconds} seconds`;
 }
 
 // used in the server command
-function createServerEmbed(message: any): Discord.MessageEmbed {
+function createServerEmbed(message: Discord.Message): Discord.MessageEmbed {
     const serverEmbed = new Discord.MessageEmbed()
         .setColor('#0099ff')
         .setTitle(`Information about ${message.guild?.name}`)
@@ -198,7 +215,7 @@ function createServerEmbed(message: any): Discord.MessageEmbed {
         )
         .setTimestamp()
 
-    const icon = message.guild.iconURL();
+    const icon = message.guild?.iconURL();
     if (icon) {
         serverEmbed.setThumbnail(icon);
     }
@@ -206,7 +223,7 @@ function createServerEmbed(message: any): Discord.MessageEmbed {
     return serverEmbed;
 }
 
-function getUser(message: any): Discord.MessageEmbed {
+function getUser(message: Discord.Message): Discord.MessageEmbed {
     const user = message.mentions.users.first() || message.author;
         let joinedTimestamp; // epoch time 
         let joinedDate; // human readable time
@@ -306,4 +323,13 @@ async function fetchMeme() {
     let response = await fetch(memeURL);
     let data = await response.json();
     return data;
+}
+
+// log date, time and server name to view usage 
+function log(message: Discord.Message) {
+    let commandName = message.content;
+    let serverName = message.guild?.name; 
+    let dateNow = new Date().toLocaleString();
+    
+    console.log(`\n${dateNow}: ${commandName} called in server: ${serverName}`);
 }
