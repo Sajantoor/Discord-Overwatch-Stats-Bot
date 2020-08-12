@@ -329,7 +329,7 @@ async function fetchMeme() {
 function log(message: Discord.Message) {
     let commandName = message.content;
     let serverName = message.guild?.name; 
-    let dateNow = new Date().toLocaleString();
+    let dateNow = new Date().toLocaleString("en-US", {timeZone: 'Canada/Pacific'});
     
     console.log(`\n${dateNow}: ${commandName} called in server: ${serverName}`);
 }
